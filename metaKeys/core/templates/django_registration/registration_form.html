@@ -1,0 +1,13 @@
+{% extends "auth_layout.html" %}
+{% load crispy_forms_tags %}
+
+{% block auth %}
+<h1>Crea Accaunt</h1>
+<div class="registration-form-container w-75">
+    <form method="post">
+        {% csrf_token %}
+        {{ form|crispy }}
+        <button type="submit" class="btn btn-sm btn-outline-primary">Registrati</button>
+    </form>
+</div>
+{% endblock %}

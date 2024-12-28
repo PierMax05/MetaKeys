@@ -1,0 +1,16 @@
+{% extends "auth_layout.html" %}
+{% load crispy_forms_tags %}
+
+{% block auth %}
+<h1>
+    <I style="color: red">metaKeys</strong>
+</h1>
+<div class="login-form-container w-50">
+    <form method="post">
+        {% csrf_token %}
+        {{ form|crispy }}
+        <button type="submit" class="btn btn-sm btn-outline-primary mt-2">Login</button>
+    </form>
+    <p class="mt-2">Oppure <a href="{% url 'django_registration_register' %}">Registra un Account</a></p>
+</div>
+{% endblock %}
