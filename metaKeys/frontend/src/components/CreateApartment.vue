@@ -22,27 +22,40 @@
       </div>
       <div class="shelly-form">
         <h5>Shelly</h5>
-        <p>Completa il form seguente se utilizzi dei dispositivi shelly per controllare le porte</p>
-        <div class="form-group">
-          <label for="server_uri">URI del Server</label>
+        <div class="form-switch">
+          <label for="shelly">Usa dispositivi Shelly</label>
           <input
-            id="server_uri"
-            v-model="apartment.server_uri"
-            @input="validateUrl"
-            class="form-control"
+            type="checkbox"
+            id="shelly"
+            v-model="apartment.shelly"
+            class="form-check-input"
+            @change="handleShellyChange"
           />
-          <div v-if="urlError" class="text-danger">{{ urlError }}</div>
         </div>
-        <div class="form-group">
-          <label for="auth_key">Chiave di Autenticazione</label>
-          <input
-            id="auth_key"
-            v-model="apartment.auth_key"
-            class="form-control"
-          />
-          <div class="form-text text-muted">
-            La chiave di autenticazione è un codice segreto che il server utilizza
-            per verificare la tua identità.
+        <div v-if="apartment.shelly">
+          <div class="form-group">
+            <label for="server_uri">URI del Server</label>
+            <input
+              id="server_uri"
+              v-model="apartment.server_uri"
+              @input="validateUrl"
+              class="form-control"
+              required
+            />
+            <div v-if="urlError" class="text-danger">{{ urlError }}</div>
+          </div>
+          <div class="form-group">
+            <label for="auth_key">Chiave di Autenticazione</label>
+            <input
+              id="auth_key"
+              v-model="apartment.auth_key"
+              class="form-control"
+              required
+            />
+            <div class="form-text text-muted">
+              La chiave di autenticazione è un codice segreto che il server utilizza
+              per verificare la tua identità.
+            </div>
           </div>
         </div>
       </div>
@@ -53,16 +66,19 @@
 
 <script>
 import { ref, getCurrentInstance } from 'vue';
+import { useStore } from 'vuex';
 import ApiService from "../common/api.service.js";
 
 export default {
   name: "CreateApartment",
   setup() {
+    const store = useStore();
     const apartment = ref({
       name: "",
       server_uri: "",
       auth_key: "",
       address: "",
+      shelly: false,
     });
     const urlError = ref(null);
     const { emit } = getCurrentInstance();
@@ -75,6 +91,13 @@ export default {
         : "URL non valido";
     };
 
+    const handleShellyChange = () => {
+      if (!apartment.value.shelly) {
+        apartment.value.server_uri = "";
+        apartment.value.auth_key = "";
+      }
+    };
+
     const submitForm = async () => {
       try {
         const response = await ApiService.post("/api/apartments/", apartment.value);
@@ -82,8 +105,9 @@ export default {
         apartment.value.server_uri = "";
         apartment.value.auth_key = "";
         apartment.value.address = "";
-        emit("close"); // Emissione evento per chiudere il modal
+        apartment.value.shelly = false;
         emit("apartment-created", response.data); // Emissione evento per aggiornare la lista degli appartamenti
+        emit("close"); // Emissione evento per chiudere il modal
       } catch (error) {
         console.error(error);
       }
@@ -93,6 +117,7 @@ export default {
       apartment,
       urlError,
       validateUrl,
+      handleShellyChange,
       submitForm,
     };
   },
@@ -108,8 +133,13 @@ export default {
   color: red;
 }
 .shelly-form {
-  margin-top: 20px;
   padding: 5%;
   border: 1px solid #ccc;
 }
+.form-switch {
+  display: flex;
+  justify-content: space-between;
+  padding-left: 0px;
+}
+
 </style>

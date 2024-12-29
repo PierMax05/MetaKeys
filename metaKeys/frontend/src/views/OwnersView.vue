@@ -28,7 +28,7 @@
         </button>
       </div>
     </nav>
-    <div v-if="connectionIssues" class="alert alert-warning">
+    <div v-if="connectionIssues" class="alert alert-warning fixed-bottom">
       ATTENZIONE! Ci sono dei dispositivi Shelly che non sono in funzione. 
       Controllare il server URI, la chiave di autenticazione, l'ID del dispositivo forniti e la connessione dei dispositivi.
     </div>
@@ -36,7 +36,7 @@
       <CheckIn />
     </div>
     <div v-if="activeComponent === 'createApartment'">
-      <ApartmentsList @showShellyStatus="openShellyModal" :hasShellyDevices="hasShellyDevices" />
+      <ApartmentsList @showShellyStatus="openShellyModalAndFetchStatus" />
     </div>
     <div v-if="activeComponent === 'checkInSearch'">
       <CheckInSearch />
@@ -59,7 +59,8 @@ import CheckIn from "../components/CheckIn.vue";
 import CheckInSearch from "../components/CheckInSearch.vue";
 import InfoList from "../components/InfoList.vue";
 import ShellyStatus from "../components/ShellyStatus.vue";
-import ApiService from '../common/api.service';
+import { useStore } from 'vuex';
+import { computed, ref } from 'vue';
 
 export default {
   name: "OwnersView",
@@ -78,13 +79,16 @@ export default {
       lastScrollY: window.scrollY,
       scrollY: window.scrollY,
       navHeight: 60, // Adjust based on navbar height
-      doorStatus: [],
       isShellyModalOpen: false,
-      connectionIssues: false,
-      hasShellyDevices: false,
     };
   },
-
+  setup() {
+    const store = useStore();
+    const hasShellyDevices = computed(() => store.getters.hasShellyDevices);
+    const doorStatus = computed(() => store.getters.doorStatus);
+    const connectionIssues = computed(() => store.getters.connectionIssues);
+    return { hasShellyDevices, doorStatus, connectionIssues, store };
+  },
   methods: {
     getImageUrl(name, ext) {
       return new URL(`../assets/${name}.${ext}`, import.meta.url).href;
@@ -104,28 +108,28 @@ export default {
       }
       this.lastScrollY = this.scrollY;
     },
-    async checkDoorStatus() {
-      try {
-        const response = await ApiService.get('/api/check-doors-status/');
-        this.doorStatus = response.data;
-        this.connectionIssues = this.doorStatus.some(status => !status.status.isok || !status.status.connected);
-        this.hasShellyDevices = this.doorStatus.length > 0;
-      } catch (error) {
-        console.error('Errore durante il controllo dello stato delle porte:', error);
-      }
-    },
     openShellyModal() {
       this.isShellyModalOpen = true;
     },
     closeShellyModal() {
       this.isShellyModalOpen = false;
     },
+    async fetchShellyStatus() {
+      if (this.hasShellyDevices) {
+        await this.store.dispatch('checkDoorStatus');
+      }
+    },
+    async openShellyModalAndFetchStatus() {
+      await this.fetchShellyStatus();
+      this.openShellyModal();
+    },
   },
   async mounted() {
     this.checkScreenSize();
     window.addEventListener("resize", this.checkScreenSize);
     window.addEventListener("scroll", this.handleScroll);
-    await this.checkDoorStatus();
+    await this.fetchShellyStatus();
+    await this.store.dispatch('checkDoorStatus'); // Chiama checkDoorStatus appena si entra sulla pagina
   },
   beforeUnmount() {
     window.removeEventListener("resize", this.checkScreenSize);
@@ -252,5 +256,12 @@ nav {
   margin-bottom: 20px;
   border-radius: 5px;
   text-align: center;
+}
+
+.fixed-bottom {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  z-index: 1000;
 }
 </style>

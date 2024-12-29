@@ -15,11 +15,13 @@
           :apartment="selectedApartment"
           @close="closeUpdateModal"
           @update-apartment="updateSelectedApartment"
+          @delete-apartment="removeApartment"
         />
       </div>
     </div>
     <div v-if="selectedApartment" class="apartment-detail">
       <ApartmentDetail
+        v-if="selectedApartment"
         :apartmentId="selectedApartment.id"
         @close="deselectApartment"
         @edit="openUpdateModal"
@@ -69,15 +71,10 @@ export default {
     CreateDoorComponent, // Aggiungi il nuovo componente qui
     CreateRoomComponent, // Aggiungi il nuovo componente qui
   },
-  props: {
-    hasShellyDevices: {
-      type: Boolean,
-      required: true,
-    },
-  },
-  setup() {
+  setup(props, { emit }) {
     const store = useStore();
     const apartments = computed(() => store.state.apartments.apartments);
+    const hasShellyDevices = computed(() => store.getters.hasShellyDevices);
     const isModalOpen = ref(false);
     const isUpdateModalOpen = ref(false);
     const selectedApartment = ref(null);
@@ -119,6 +116,7 @@ export default {
 
     const removeApartment = (apartmentId) => {
       store.commit('SET_APARTMENTS', store.state.apartments.apartments.filter(apartment => apartment.id !== apartmentId));
+      closeUpdateModal();
       deselectApartment();
     };
 
@@ -132,6 +130,7 @@ export default {
 
     return {
       apartments,
+      hasShellyDevices,
       isModalOpen,
       isUpdateModalOpen,
       selectedApartment,

@@ -11,6 +11,9 @@
         <p>Stato: {{ status.status.isok ? 'OK' : 'Non OK' }}</p>
       </div>
     </div>
+    <div v-else class="no-devices-card">
+      <p>Non ci sono dispositivi collegati.</p>
+    </div>
   </div>
 </template>
 
@@ -40,6 +43,7 @@ export default {
   padding-inline: 120px;
   display: flex;
   flex-direction: column;
+  align-items: center;
 }
 
 .status-card {
@@ -63,10 +67,19 @@ export default {
   color: white; /* White text */
 }
 
+.no-devices-card {
+  background-color: #f9c74f; /* Yellow background */
+  border: 1px solid #f9c74f;
+  color: black;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  margin-top: 20px;
+}
+
 @media (max-width: 768px) {
   .shelly-status {
     padding-inline: 0;
-    
   }
 }
 </style>

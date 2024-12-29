@@ -22,22 +22,35 @@
       </div>
       <div class="shelly-form">
         <h5>Shelly</h5>
-        <p>Completa il form seguente se utilizzi dei dispositivi shelly per controllare le porte</p>
-        <div class="form-group">
-          <label for="server_uri">URI del Server</label>
+        <div class="form-switch">
+          <label for="shelly">Usa dispositivi Shelly</label>
           <input
-            id="server_uri"
-            v-model="localApartment.server_uri"
-            class="form-control"
+            type="checkbox"
+            id="shelly"
+            v-model="localApartment.shelly"
+            class="form-check-input"
+            @change="handleShellyChange"
           />
         </div>
-        <div class="form-group">
-          <label for="auth_key">Chiave di Autenticazione</label>
-          <input
-            id="auth_key"
-            v-model="localApartment.auth_key"
-            class="form-control"
-          />
+        <div v-if="localApartment.shelly">
+          <div class="form-group">
+            <label for="server_uri">URI del Server</label>
+            <input
+              id="server_uri"
+              v-model="localApartment.server_uri"
+              class="form-control"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="auth_key">Chiave di Autenticazione</label>
+            <input
+              id="auth_key"
+              v-model="localApartment.auth_key"
+              class="form-control"
+              required
+            />
+          </div>
         </div>
       </div>
       <div class="form-actions">
@@ -67,22 +80,35 @@ export default defineComponent({
     const store = useStore();
     const apartment = computed(() => store.state.apartments.apartments.find(a => a.id === props.apartmentId));
     const localApartment = ref({ ...apartment.value });
+    const originalApartment = ref({ ...apartment.value });
+
+    const handleShellyChange = () => {
+      if (!localApartment.value.shelly) {
+        localApartment.value.server_uri = "";
+        localApartment.value.auth_key = "";
+      }
+    };
 
     const submitForm = async () => {
-      try {
-        await store.dispatch('updateApartment', localApartment.value);
-        emit("update-apartment", localApartment.value);
+      if (JSON.stringify(localApartment.value) === JSON.stringify(originalApartment.value)) {
         emit("close");
+        emit("no-changes");
+        return;
+      }
+      try {
+        const response = await store.dispatch('updateApartment', localApartment.value);
+        if (response && response.data) {
+          emit("update-apartment", response.data);
+        }
       } catch (error) {
         console.error(error);
       }
+      emit("close");
     };
 
     const deleteApartment = async () => {
       try {
-        await store.dispatch('deleteApartment', localApartment.value.id);
         emit("delete-apartment", localApartment.value.id);
-        emit("close");
       } catch (error) {
         console.error(error);
       }
@@ -98,12 +124,14 @@ export default defineComponent({
       apartment,
       (newVal) => {
         localApartment.value = { ...newVal };
+        originalApartment.value = { ...newVal };
       },
       { deep: true }
     );
 
     return {
       localApartment,
+      handleShellyChange,
       submitForm,
       confirmDelete,
     };
@@ -154,5 +182,10 @@ export default defineComponent({
   padding: 5%;
   border: 1px solid #ccc;
   margin-top: 20px;
+}
+.form-switch {
+  display: flex;
+  justify-content: space-between;
+  padding-left: 0px;
 }
 </style>

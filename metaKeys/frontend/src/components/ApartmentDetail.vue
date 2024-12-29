@@ -1,7 +1,7 @@
 <template>
   <div class="apartment-detail">
     <button class="close-button" @click="$emit('close')">&larr;</button>
-    <div class="details">
+    <div class="details" v-if="apartment">
       <h2>{{ apartment.name }}</h2>
       <div class="button-group">
         <button class="action-button" :class="{ selected: selectedButton === 'apartment' }" @click="selectButton('apartment')">Struttura</button>
@@ -21,15 +21,18 @@
             @close="closeUpdateModal"
             @update-apartment="handleUpdate"
             @delete-apartment="handleDelete"
+            @no-changes="showNoChangesMessage"
           />
         </div>
         <div v-else>
           <p><strong>Nome:</strong> {{ apartment.name }}</p>
           <p><strong>Indirizzo:</strong> {{ apartment.address }}</p>
-          <p v-if="apartment.server_uri"><strong>URI del Server:</strong> {{ apartment.server_uri }}</p>
-          <div class="auth-key-container" v-if="apartment.auth_key">
-            <p><strong>Chiave di Autenticazione:</strong></p>
-            <div class="auth-key">{{ apartment.auth_key }}</div>
+          <div v-if="apartment.shelly">
+            <p v-if="apartment.server_uri"><strong>URI del Server:</strong> {{ apartment.server_uri }}</p>
+            <div class="auth-key-container" v-if="apartment.auth_key">
+              <p><strong>Chiave di Autenticazione:</strong></p>
+              <div class="auth-key">{{ apartment.auth_key }}</div>
+            </div>
           </div>
         </div>
       </div>
@@ -96,6 +99,9 @@
         </div>
       </div>
     </div>
+    <div v-if="noChangesMessage" class="alert alert-warning fixed-bottom">
+      Nessuna modifica apportata.
+    </div>
   </div>
 </template>
 
@@ -138,6 +144,7 @@ export default {
     const selectedButton = ref('apartment');
     const selectedDoor = ref(null);
     const selectedRoom = ref(null);
+    const noChangesMessage = ref(false);
 
     const fetchDoors = async () => {
       try {
@@ -242,11 +249,24 @@ export default {
       apartment.value.address = updatedApartment.address;
       apartment.value.server_uri = updatedApartment.server_uri;
       apartment.value.auth_key = updatedApartment.auth_key;
+      selectButton('apartment');
     };
 
-    const handleDelete = (apartmentId) => {
-      emit("delete-apartment", apartmentId);
-      closeUpdateModal();
+    const handleDelete = async (apartmentId) => {
+      try {
+        await store.dispatch('deleteApartment', apartmentId);
+        emit("delete-apartment", apartmentId);
+        closeUpdateModal();
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    const showNoChangesMessage = () => {
+      noChangesMessage.value = true;
+      setTimeout(() => {
+        noChangesMessage.value = false;
+      }, 3000);
     };
 
     const selectButton = (button) => {
@@ -278,6 +298,7 @@ export default {
       doors,
       selectedDoor,
       selectedRoom,
+      noChangesMessage,
       openDoorsModal,
       closeDoorsModal,
       openCreateModal,
@@ -298,6 +319,7 @@ export default {
       handleRoomDeleted,
       handleUpdate,
       handleDelete,
+      showNoChangesMessage,
       selectedButton,
       selectButton,
       closeAllModals,

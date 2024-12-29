@@ -11,6 +11,7 @@ class Apartment(models.Model):
     server_uri = models.URLField(max_length=200, blank=True, null=True)
     auth_key = models.CharField(max_length=255, blank=True, null=True)
     address = models.CharField(max_length=255, null=True, blank=True)
+    shelly = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name

@@ -6,6 +6,9 @@ const state = {
   doors: {},
   isApartmentsFetched: false,
   fetchedRooms: {},
+  hasShellyDevices: false,
+  doorStatus: [],
+  connectionIssues: false,
 };
 
 const actions = {
@@ -15,6 +18,7 @@ const actions = {
       const { data } = await ApiService.get("/api/apartments/");  
       commit('SET_APARTMENTS', data);
       commit('SET_APARTMENTS_FETCHED', true);
+      commit('CHECK_HAS_SHELLY_DEVICES'); // Controlla se ci sono dispositivi Shelly
     } catch (error) {
       console.error(error);
     }
@@ -37,26 +41,29 @@ const actions = {
       console.error(error);
     }
   },
-  async createDoor({ commit }, door) {
+  async createDoor({ commit, dispatch }, door) {
     try {
       const { data } = await ApiService.post("/api/doors/", door);
       commit('ADD_DOOR', data);
+      await dispatch('checkDoorStatus'); // Richiama checkDoorStatus dopo la creazione
     } catch (error) {
       console.error(error);
     }
   },
-  async updateDoor({ commit }, door) {
+  async updateDoor({ commit, dispatch }, door) {
     try {
       const { data } = await ApiService.put(`/api/doors/${door.id}/`, door);
       commit('UPDATE_DOOR', data);
+      await dispatch('checkDoorStatus'); // Richiama checkDoorStatus dopo l'aggiornamento
     } catch (error) {
       console.error(error);
     }
   },
-  async deleteDoor({ commit }, doorId) {
+  async deleteDoor({ commit, dispatch }, doorId) {
     try {
       await ApiService.delete(`/api/doors/${doorId}/`);
       commit('DELETE_DOOR', doorId);
+      await dispatch('checkDoorStatus'); // Richiama checkDoorStatus dopo la cancellazione
     } catch (error) {
       console.error(error);
     }
@@ -85,20 +92,34 @@ const actions = {
       console.error(error);
     }
   },
-  async updateApartment({ commit }, apartment) {
+  async updateApartment({ commit, dispatch }, apartment) {
     try {
       const { data } = await ApiService.put(`/api/apartments/${apartment.id}/`, apartment);
       commit('UPDATE_APARTMENT', data);
+      commit('CHECK_HAS_SHELLY_DEVICES'); // Controlla se ci sono dispositivi Shelly dopo l'aggiornamento
+      await dispatch('checkDoorStatus'); // Richiama checkDoorStatus dopo l'aggiornamento
     } catch (error) {
       console.error(error);
     }
   },
-  async deleteApartment({ commit }, apartmentId) {
+  async deleteApartment({ commit, dispatch }, apartmentId) {
     try {
       await ApiService.delete(`/api/apartments/${apartmentId}/`);
       commit('DELETE_APARTMENT', apartmentId);
+      commit('CHECK_HAS_SHELLY_DEVICES'); // Controlla se ci sono dispositivi Shelly dopo la cancellazione
+      await dispatch('checkDoorStatus'); // Richiama checkDoorStatus dopo la cancellazione
     } catch (error) {
       console.error(error);
+    }
+  },
+  async checkDoorStatus({ commit }) {
+    try {
+      const { data } = await ApiService.get('/api/check-doors-status/');
+      const connectionIssues = data.some(status => !status.status.isok || !status.status.connected);
+      commit('SET_DOOR_STATUS', data);
+      commit('SET_CONNECTION_ISSUES', connectionIssues);
+    } catch (error) {
+      console.error('Errore durante il controllo dello stato delle porte:', error);
     }
   },
 };
@@ -164,12 +185,33 @@ const mutations = {
   DELETE_APARTMENT(state, apartmentId) {
     state.apartments = state.apartments.filter(apartment => apartment.id !== apartmentId);
   },
+  SET_HAS_SHELLY_DEVICES(state, status) {
+    state.hasShellyDevices = status;
+  },
+  CHECK_HAS_SHELLY_DEVICES(state) {
+    state.hasShellyDevices = state.apartments.some(apartment => apartment.shelly);
+  },
+  SET_DOOR_STATUS(state, status) {
+    state.doorStatus = status;
+  },
+  SET_CONNECTION_ISSUES(state, status) {
+    state.connectionIssues = status;
+  },
 };
 
 const getters = {
   getRoomsByApartment: (state) => (apartmentId) => {
     return state.rooms[apartmentId] || [];
-  }
+  },
+  hasShellyDevices: (state) => {
+    return state.hasShellyDevices;
+  },
+  doorStatus: (state) => {
+    return state.doorStatus;
+  },
+  connectionIssues: (state) => {
+    return state.connectionIssues;
+  },
 };
 
 export default {
