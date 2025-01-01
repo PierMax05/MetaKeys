@@ -32,12 +32,16 @@
             <span v-else>{{ apartment.address }}</span>
           </p>
           <div v-if="apartment.shelly">
+            <p><strong>Questo appartamento utilizza dispositivi Shelly</strong></p>
             <p v-if="apartment.server_uri"><strong>URI del Server:</strong> {{ apartment.server_uri }}</p>
             <div class="auth-key-container" v-if="apartment.auth_key">
               <p><strong>Chiave di Autenticazione:</strong></p>
               <div class="auth-key">{{ apartment.auth_key }}</div>
             </div>
           </div>
+          <p><strong>Richiedi informazioni ospite:</strong> {{ apartment.get_guest_info ? 'Sì' : 'No' }}</p>
+          <p><strong>Richiedi foto documento:</strong> {{ apartment.get_document_photo ? 'Sì' : 'No' }}</p>
+          <p><strong>Richiedi informazioni di fatturazione:</strong> {{ apartment.get_billing_info ? 'Sì' : 'No' }}</p>
         </div>
       </div>
       <div class="doors" v-if="selectedButton === 'doors'">
@@ -254,6 +258,10 @@ export default {
       apartment.value.server_uri = updatedApartment.server_uri;
       apartment.value.auth_key = updatedApartment.auth_key;
       apartment.value.google_maps_link = updatedApartment.google_maps_link;
+      apartment.value.shelly = updatedApartment.shelly;
+      apartment.value.get_guest_info = updatedApartment.get_guest_info;
+      apartment.value.get_document_photo = updatedApartment.get_document_photo;
+      apartment.value.get_billing_info = updatedApartment.get_billing_info;
       selectButton('apartment');
     };
 

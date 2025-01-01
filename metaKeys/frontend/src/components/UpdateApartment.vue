@@ -66,6 +66,37 @@
           </div>
         </div>
       </div>
+      <p class="text-muted">
+        Seleziona le informazioni che desideri richiedere all'ospite. Sarà possibile
+        modificarle durante la creazione di un soggiorno.
+      </p>
+      <div class="form-switch">
+        <label for="get_guest_info">informazioni ospite</label>
+        <input
+          type="checkbox"
+          id="get_guest_info"
+          v-model="localApartment.get_guest_info"
+          class="form-check-input"
+        />
+      </div>
+      <div class="form-switch">
+        <label for="get_document_photo">foto documento</label>
+        <input
+          type="checkbox"
+          id="get_document_photo"
+          v-model="localApartment.get_document_photo"
+          class="form-check-input"
+        />
+      </div>
+      <div class="form-switch">
+        <label for="get_billing_info">informazioni di fatturazione</label>
+        <input
+          type="checkbox"
+          id="get_billing_info"
+          v-model="localApartment.get_billing_info"
+          class="form-check-input"
+        />
+      </div>
       <div class="form-actions">
         <button type="button" class="btn btn-secondary" @click="$emit('close')">Chiudi</button>
         <div class="action-buttons">
@@ -92,8 +123,8 @@ export default defineComponent({
   setup(props, { emit }) {
     const store = useStore();
     const apartment = computed(() => store.state.apartments.apartments.find(a => a.id === props.apartmentId));
-    const localApartment = ref({ ...apartment.value });
-    const originalApartment = ref({ ...apartment.value });
+    const localApartment = ref({...apartment.value});
+    const originalApartment = ref({...apartment.value});
     const googleLinkError = ref(null);
 
     const handleShellyChange = () => {

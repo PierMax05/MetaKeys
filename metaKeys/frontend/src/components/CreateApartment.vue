@@ -72,6 +72,37 @@
           </div>
         </div>
       </div>
+      <p class="text-muted">
+        Seleziona le informazioni che desideri richiedere all'ospite. Sarà possibile
+        modificarle durante la creazione di un soggiorno.
+      </p>
+      <div class="form-switch">
+        <label for="get_guest_info">Richiedi informazioni ospite</label>
+        <input
+          type="checkbox"
+          id="get_guest_info"
+          v-model="apartment.get_guest_info"
+          class="form-check-input"
+        />
+      </div>
+      <div class="form-switch">
+        <label for="get_document_photo">Richiedi foto documento</label>
+        <input
+          type="checkbox"
+          id="get_document_photo"
+          v-model="apartment.get_document_photo"
+          class="form-check-input"
+        />
+      </div>
+      <div class="form-switch">
+        <label for="get_billing_info">Richiedi informazioni di fatturazione</label>
+        <input
+          type="checkbox"
+          id="get_billing_info"
+          v-model="apartment.get_billing_info"
+          class="form-check-input"
+        />
+      </div>
       <button type="submit" class="btn btn-primary mt-4">Crea</button>
     </form>
   </div>
@@ -93,6 +124,9 @@ export default {
       address: "",
       shelly: false,
       google_maps_link: "",
+      get_guest_info: false,
+      get_document_photo: false,
+      get_billing_info: false,
     });
     const urlError = ref(null);
     const googleLinkError = ref(null);
@@ -129,6 +163,9 @@ export default {
         apartment.value.address = "";
         apartment.value.shelly = false;
         apartment.value.google_maps_link = "";
+        apartment.value.get_guest_info = false;
+        apartment.value.get_document_photo = false;
+        apartment.value.get_billing_info = false;
         emit("apartment-created", response.data); // Emissione evento per aggiornare la lista degli appartamenti
         emit("close"); // Emissione evento per chiudere il modal
       } catch (error) {

@@ -28,9 +28,10 @@
         </button>
       </div>
     </nav>
-    <div v-if="connectionIssues" class="alert alert-warning fixed-bottom">
+    <div v-if="connectionIssues && showConnectionIssues" class="alert alert-warning fixed-bottom">
       ATTENZIONE! Ci sono dei dispositivi Shelly che non sono in funzione. 
       Controllare il server URI, la chiave di autenticazione, l'ID del dispositivo forniti e la connessione dei dispositivi.
+      <button class="btn align-end" @click="handleClose">Chiudi</button>
     </div>
     <div v-if="activeComponent === 'checkIn'">
       <CheckIn />
@@ -80,6 +81,7 @@ export default {
       scrollY: window.scrollY,
       navHeight: 60, // Adjust based on navbar height
       isShellyModalOpen: false,
+      showConnectionIssues: true,
     };
   },
   setup() {
@@ -113,6 +115,9 @@ export default {
     },
     closeShellyModal() {
       this.isShellyModalOpen = false;
+    },
+    handleClose() {
+      this.showConnectionIssues = false;
     },
     async fetchShellyStatus() {
       if (this.hasShellyDevices) {

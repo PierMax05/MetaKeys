@@ -13,6 +13,9 @@ class Apartment(models.Model):
     address = models.CharField(max_length=255, null=True, blank=True)
     shelly = models.BooleanField(default=False)
     google_maps_link = models.URLField(max_length=200, blank=True, null=True)
+    get_guest_info = models.BooleanField(default=False)
+    get_document_photo = models.BooleanField(default=False)
+    get_billing_info = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name

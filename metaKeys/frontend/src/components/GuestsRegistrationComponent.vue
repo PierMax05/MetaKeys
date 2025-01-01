@@ -89,6 +89,7 @@
       <div class="form-group">
         <label for="apartment">Struttura:</label>
         <select v-model="form.apartment" class="form-control" required @change="fetchRooms">
+          <option value="" disabled selected>Seleziona una struttura</option>
           <option
             v-for="apartment in apartments"
             :key="apartment.id"
@@ -101,6 +102,7 @@
       <div class="form-group">
         <label for="room">Camera:</label>
         <select v-model="form.room" class="form-control" required>
+          <option value="" disabled selected>Seleziona una camera</option>
           <option
             v-for="room in rooms"
             :key="room.id"
@@ -181,11 +183,11 @@ export default defineComponent({
       check_in_time: "",
       check_out_time: "",
       password: "",
-      apartment: null,
-      room: null,
-      require_registration_form: true,
-      require_document_photo: true,
-      require_billing_info: true,
+      apartment: "",
+      room: "",
+      require_registration_form: false,
+      require_document_photo: false,
+      require_billing_info: false,
     });
 
     const apartments = ref([]);
@@ -216,8 +218,8 @@ export default defineComponent({
         check_in_time: "",
         check_out_time: "",
         password: "",
-        apartment: null,
-        room: null,
+        apartment: "",
+        room: "",
         require_registration_form: true,
         require_document_photo: true,
         require_billing_info: true,
@@ -241,6 +243,12 @@ export default defineComponent({
       if (form.value.apartment) {
         await store.dispatch('fetchRooms', form.value.apartment);
         rooms.value = store.getters.getRoomsByApartment(form.value.apartment);
+        const selectedApartment = store.state.apartments.apartments.find(a => a.id === form.value.apartment);
+        if (selectedApartment) {
+          form.value.require_registration_form = selectedApartment.get_guest_info;
+          form.value.require_document_photo = selectedApartment.get_document_photo;
+          form.value.require_billing_info = selectedApartment.get_billing_info;
+        }
       } else {
         rooms.value = [];
       }
