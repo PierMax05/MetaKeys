@@ -17,6 +17,10 @@ import threading
 from django.db import models
 import time
 
+def validate_google_link(google_link):
+    if google_link and not google_link.startswith("https://maps.app.goo.gl/"):
+        raise ValidationError("Il link deve essere un link di Google Maps.")
+
 class ApartmentViewSet(viewsets.ModelViewSet):
 
     serializer_class = ApartmentSerializer
@@ -31,12 +35,14 @@ class ApartmentViewSet(viewsets.ModelViewSet):
         if self.request.user.profile.profile_type != 'owner':
             raise PermissionDenied("Solo i proprietari possono creare appartamenti.")
         # Imposta l'utente autenticato come proprietario dell'appartamento
+        validate_google_link(serializer.validated_data.get('google_maps_link'))
         serializer.save(user=self.request.user.profile)
     
     def perform_update(self, serializer):
         # Verifica se l'utente autenticato è il proprietario dell'appartamento
         if serializer.instance.user != self.request.user.profile:
             raise PermissionDenied("Non hai il permesso di modificare questo appartamento.")
+        validate_google_link(serializer.validated_data.get('google_maps_link'))
         serializer.save()
 
     def perform_destroy(self, instance):
@@ -261,14 +267,14 @@ class ApartmentInfoViewSet(viewsets.ModelViewSet):
         # Solo gli owner possono creare informazioni sugli appartamenti
         if self.request.user.profile.profile_type != 'owner':
             raise PermissionDenied("Solo i proprietari possono creare informazioni sugli appartamenti.")
-        self.validate_google_link(serializer.validated_data.get('google_link'))
+        validate_google_link(serializer.validated_data.get('google_link'))
         serializer.save(user=self.request.user.profile)
 
     def perform_update(self, serializer):
         # Solo chi ha creato l'istanza può modificarla
         if serializer.instance.user != self.request.user.profile:
             raise PermissionDenied("Non hai il permesso di modificare queste informazioni.")
-        self.validate_google_link(serializer.validated_data.get('google_link'))
+        validate_google_link(serializer.validated_data.get('google_link'))
         serializer.save()
 
     def perform_destroy(self, instance):
@@ -276,10 +282,6 @@ class ApartmentInfoViewSet(viewsets.ModelViewSet):
         if instance.user != self.request.user.profile:
             raise PermissionDenied("Non hai il permesso di cancellare queste informazioni.")
         instance.delete()
-
-    def validate_google_link(self, google_link):
-        if google_link and not google_link.startswith("https://maps.app.goo.gl/"):
-            raise ValidationError("Il link deve essere un link di Google Maps.")
 
 class CheckDoorsStatusView(APIView):
     permission_classes = [IsAuthenticated]

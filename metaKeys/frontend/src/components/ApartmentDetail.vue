@@ -26,7 +26,11 @@
         </div>
         <div v-else>
           <p><strong>Nome:</strong> {{ apartment.name }}</p>
-          <p><strong>Indirizzo:</strong> {{ apartment.address }}</p>
+          <p>
+            <strong>Indirizzo:</strong>
+            <a v-if="apartment.google_maps_link" :href="apartment.google_maps_link" target="_blank">{{ apartment.address }}</a>
+            <span v-else>{{ apartment.address }}</span>
+          </p>
           <div v-if="apartment.shelly">
             <p v-if="apartment.server_uri"><strong>URI del Server:</strong> {{ apartment.server_uri }}</p>
             <div class="auth-key-container" v-if="apartment.auth_key">
@@ -249,6 +253,7 @@ export default {
       apartment.value.address = updatedApartment.address;
       apartment.value.server_uri = updatedApartment.server_uri;
       apartment.value.auth_key = updatedApartment.auth_key;
+      apartment.value.google_maps_link = updatedApartment.google_maps_link;
       selectButton('apartment');
     };
 

@@ -20,6 +20,19 @@
           required
         />
       </div>
+      <div class="form-group">
+        <label for="google_maps_link">Link Google Maps</label>
+        <input
+          id="google_maps_link"
+          v-model="apartment.google_maps_link"
+          @input="validateGoogleLink"
+          class="form-control"
+        />
+        <div class="form-text text-muted">
+          Cerca la posizione su Google Maps e copia il link qui.
+        </div>
+        <div v-if="googleLinkError" class="text-danger">{{ googleLinkError }}</div>
+      </div>
       <div class="shelly-form">
         <h5>Shelly</h5>
         <div class="form-switch">
@@ -79,8 +92,10 @@ export default {
       auth_key: "",
       address: "",
       shelly: false,
+      google_maps_link: "",
     });
     const urlError = ref(null);
+    const googleLinkError = ref(null);
     const { emit } = getCurrentInstance();
 
     const validateUrl = () => {
@@ -89,6 +104,13 @@ export default {
       urlError.value = pattern.test(apartment.value.server_uri)
         ? null
         : "URL non valido";
+    };
+
+    const validateGoogleLink = () => {
+      const pattern = /^https:\/\/maps\.app\.goo\.gl\//;
+      googleLinkError.value = pattern.test(apartment.value.google_maps_link)
+        ? null
+        : "Il link deve essere un link di Google Maps.";
     };
 
     const handleShellyChange = () => {
@@ -106,6 +128,7 @@ export default {
         apartment.value.auth_key = "";
         apartment.value.address = "";
         apartment.value.shelly = false;
+        apartment.value.google_maps_link = "";
         emit("apartment-created", response.data); // Emissione evento per aggiornare la lista degli appartamenti
         emit("close"); // Emissione evento per chiudere il modal
       } catch (error) {
@@ -116,7 +139,9 @@ export default {
     return {
       apartment,
       urlError,
+      googleLinkError,
       validateUrl,
+      validateGoogleLink,
       handleShellyChange,
       submitForm,
     };

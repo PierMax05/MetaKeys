@@ -59,13 +59,15 @@ class CheckInProfileSerializer(serializers.ModelSerializer):
     
 class CheckInProfileGuestSerializer(serializers.ModelSerializer):
     apartment_name = serializers.SerializerMethodField()
+    address = serializers.SerializerMethodField()
+    google_maps_link = serializers.SerializerMethodField()
 
     class Meta:
         model = CheckInProfile
         fields = ['name', 'surname', 'check_in_date',
                   'check_in_time', 'check_out_date',
                   'check_out_time', 'guest_number',
-                  'apartment', 'apartment_name', 'id', 
+                  'apartment', 'apartment_name', 'address', 'google_maps_link', 'id', 
                   'require_document_photo', 'require_registration_form', 
                   'require_billing_info', 'got_billing_info', 'got_registration_form',
                   'room_name']
@@ -75,6 +77,22 @@ class CheckInProfileGuestSerializer(serializers.ModelSerializer):
         try:
             apartment = Apartment.objects.get(id=obj.apartment.id)
             return apartment.name
+        except Apartment.DoesNotExist:
+            return None
+
+    def get_address(self, obj):
+        # Ottieni l'indirizzo dell'appartamento tramite l'ID
+        try:
+            apartment = Apartment.objects.get(id=obj.apartment.id)
+            return apartment.address
+        except Apartment.DoesNotExist:
+            return None
+
+    def get_google_maps_link(self, obj):
+        # Ottieni il link di Google Maps dell'appartamento tramite l'ID
+        try:
+            apartment = Apartment.objects.get(id=obj.apartment.id)
+            return apartment.google_maps_link
         except Apartment.DoesNotExist:
             return None
 

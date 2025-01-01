@@ -39,6 +39,11 @@
           {{ formatDate(profile.check_out_date) }} ore:
           {{ formatTime(profile.check_out_time) }}
         </p>
+        <p>
+          <strong>Indirizzo:</strong>
+          <a v-if="profile.google_maps_link" :href="profile.google_maps_link" target="_blank">{{ profile.address }}</a>
+          <span v-else>{{ profile.address }}</span>
+        </p>
       </div>
       <GuestKeysComponent v-if="currentSection === 'component1'" 
                           :profile="profile" 

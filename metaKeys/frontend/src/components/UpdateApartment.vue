@@ -20,6 +20,19 @@
           required
         />
       </div>
+      <div class="form-group">
+        <label for="google_maps_link">Link Google Maps</label>
+        <input
+          id="google_maps_link"
+          v-model="localApartment.google_maps_link"
+          @input="validateGoogleLink"
+          class="form-control"
+        />
+        <div class="form-text text-muted">
+          Cerca la posizione su Google Maps e copia il link qui.
+        </div>
+        <div v-if="googleLinkError" class="text-danger">{{ googleLinkError }}</div>
+      </div>
       <div class="shelly-form">
         <h5>Shelly</h5>
         <div class="form-switch">
@@ -81,12 +94,20 @@ export default defineComponent({
     const apartment = computed(() => store.state.apartments.apartments.find(a => a.id === props.apartmentId));
     const localApartment = ref({ ...apartment.value });
     const originalApartment = ref({ ...apartment.value });
+    const googleLinkError = ref(null);
 
     const handleShellyChange = () => {
       if (!localApartment.value.shelly) {
         localApartment.value.server_uri = "";
         localApartment.value.auth_key = "";
       }
+    };
+
+    const validateGoogleLink = () => {
+      const pattern = /^https:\/\/maps\.app\.goo\.gl\//;
+      googleLinkError.value = pattern.test(localApartment.value.google_maps_link)
+        ? null
+        : "Il link deve essere un link di Google Maps.";
     };
 
     const submitForm = async () => {
@@ -131,7 +152,9 @@ export default defineComponent({
 
     return {
       localApartment,
+      googleLinkError,
       handleShellyChange,
+      validateGoogleLink,
       submitForm,
       confirmDelete,
     };
