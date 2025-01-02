@@ -217,7 +217,6 @@ export default defineComponent({
 
 .update-apartment-modal {
   position: relative;
-  padding: 20px;
 }
 
 .form-actions {
@@ -233,7 +232,9 @@ export default defineComponent({
 }
 
 .shelly-form {
-  padding: 5%;
+  padding-inline: 5%;
+  padding-top: 2%;
+  padding-bottom: 2%;
   border: 1px solid #ccc;
   margin-top: 20px;
 }

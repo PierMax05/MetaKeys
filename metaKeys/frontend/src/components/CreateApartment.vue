@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="create-apartment">
     <h3>Crea Alloggio</h3>
     <form @submit.prevent="submitForm">
       <div class="form-group">
@@ -187,6 +187,12 @@ export default {
 </script>
 
 <style scoped>
+.create-apartment {
+  padding: 5%;
+  overflow-y: auto;
+  max-height: 100vh;
+}
+
 .form-group {
   margin-bottom: 15px;
 }

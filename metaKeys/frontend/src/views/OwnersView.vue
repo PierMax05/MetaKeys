@@ -30,8 +30,10 @@
     </nav>
     <div v-if="connectionIssues && showConnectionIssues" class="alert alert-warning fixed-bottom">
       ATTENZIONE! Ci sono dei dispositivi Shelly che non sono in funzione. 
-      Controllare il server URI, la chiave di autenticazione, l'ID del dispositivo forniti e la connessione dei dispositivi.
-      <button class="btn align-end" @click="handleClose">Chiudi</button>
+      Controllare il server URI, la chiave di autenticazione, l'ID e la connessione dei dispositivi.
+      <div class="button-group">
+        <button class="btn" @click="handleClose">Chiudi</button>
+      </div>
     </div>
     <div v-if="activeComponent === 'checkIn'">
       <CheckIn />
@@ -244,23 +246,31 @@ nav {
   position: relative;
 }
 
-.close-button {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background: none;
-  border: none;
-  font-size: 24px;
-  cursor: pointer;
-}
-
 .alert {
   padding: 15px;
   background-color: #f9c74f;
   color: black;
   margin-bottom: 20px;
   border-radius: 5px;
-  text-align: center;
+  text-align: start;
+  position: absolute;
+}
+
+.button-group {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 5px 10px;
+  font-size: 20px;
+  background-color: transparent;
+  color: #000;
+  border: none;
 }
 
 .fixed-bottom {
