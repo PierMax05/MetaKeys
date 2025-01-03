@@ -16,8 +16,16 @@
             <div v-for="(info, index) in restaurantsInfos" :key="info.id" 
                  :class="['info-card', { 'active': activeCard === info.id, 'first-card': index === 0, 'last-card': index === restaurantsInfos.length - 1, 'scrollable': activeCard === info.id }]"
                  @click="setActiveCard(info.id, $event)">
-              <h4>{{ info.title }}</h4>
-              <p>{{ info.info }}</p>
+              <div :class="['card-content', { 'scrollable': activeCard === info.id }]">
+                <h4>{{ info.title }}</h4>
+                <p>{{ info.info }}</p>
+              </div>
+              <div v-if="info.google_link && info.google_link.trim() !== ''">
+                <br>
+                <div class="card-footer">
+                  <a :href="info.google_link" target="_blank">Apri in Mappe</a>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -91,6 +99,9 @@ export default {
 }
 
 .info-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   background-color: white;
   color: black;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -98,11 +109,22 @@ export default {
   width: 300px; /* Modificato width */
   font-size: 14px;
   text-align: start; /* Aggiunto text-align: start */
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, z-index 0.3s ease; /* Aggiunto z-index */
   margin: 50px 0; /* Aumentato margine sopra e sotto */
   white-space: normal; /* Permetti al testo di andare a capo */
   height: 250px; /* Altezza ridotta */
   overflow: hidden; /* Evita che il testo esca fuori dalle card non selezionate */
+  position: relative; /* Aggiunto per il posizionamento del footer */
+  z-index: 1; /* Aggiunto per la sovrapposizione */
+}
+
+.card-content {
+  overflow-y: hidden; /* Disabilita lo scroll verticale per il contenuto */
+  flex-grow: 1; /* Permetti al contenuto di crescere */
+}
+
+.card-content.scrollable {
+  overflow-y: auto; /* Permetti lo scroll verticale solo quando attivo */
 }
 
 .info-card.scrollable {
@@ -113,6 +135,7 @@ export default {
   transform: scale(1.2); /* Aumentato scale */
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Aumentato box-shadow */
   overflow-y: auto; /* Permetti lo scroll verticale */
+  z-index: 10; /* Porta la card attiva in primo piano */
 }
 
 .info-card.first-card.active {
@@ -121,6 +144,26 @@ export default {
 
 .info-card.last-card.active {
   transform-origin: right center;
+}
+
+.info-card .card-footer {
+  position: absolute; /* Fissa il footer in basso */
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: white; /* Aggiunto per migliorare la visibilità */
+  padding-top: 10px;
+  text-align: center;
+}
+
+.info-card .card-footer a {
+  color: #1a237e;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.info-card .card-footer a:hover {
+  text-decoration: underline;
 }
 
 .spinner-container {
